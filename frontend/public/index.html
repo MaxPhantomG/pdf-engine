@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Engine</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>PDF Engine</h1>
+
+      <section class="card" id="auth-section">
+        <h2>Вход / регистрация</h2>
+        <form id="auth-form">
+          <input id="username" type="text" placeholder="Логин" required />
+          <input id="password" type="password" placeholder="Пароль" required />
+          <button type="submit" id="login-btn">Войти</button>
+          <button type="button" id="register-btn">Регистрация</button>
+        </form>
+        <p id="auth-message"></p>
+      </section>
+
+      <section class="card">
+        <h2>Загрузка PDF</h2>
+        <form id="upload-form">
+          <input id="pdf-files" type="file" accept="application/pdf" multiple />
+          <button type="submit">Загрузить</button>
+        </form>
+        <p id="upload-message"></p>
+      </section>
+
+      <section class="card">
+        <h2>Мои документы</h2>
+        <button id="refresh-docs-btn" type="button">Обновить список</button>
+        <div id="documents-list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Поиск по документам</h2>
+        <form id="search-form">
+          <input id="search-query" type="text" placeholder="Введите запрос" required />
+          <button type="submit">Искать</button>
+        </form>
+        <div id="search-results"></div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+
