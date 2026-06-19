@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend/app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # например, укажите переменные, если нужно
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./worker/app
+      dockerfile: Dockerfile
+    environment:
+      # переменные окружения, если нужны
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
