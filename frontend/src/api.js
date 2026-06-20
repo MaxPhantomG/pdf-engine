@@ -12,7 +12,7 @@ async function request(path, options = {}) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`APIBASE{API_BASE}APIB​ASE{path}`, {
+  const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
   });
@@ -55,7 +55,7 @@ export async function uploadDocuments(files) {
     formData.append("files", file);
   }
 
-  return request("/documents/upload", {
+  return request("/documents/", {
     method: "POST",
     body: formData,
   });
@@ -70,12 +70,8 @@ export async function fetchDocumentStatus(documentId) {
 }
 
 export async function searchDocuments(query) {
-  return request("/search", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query }),
+  return request(`/search/?query=${encodeURIComponent(query)}`, {
+    method: "GET",
   });
 }
 

@@ -1,19 +1,25 @@
 import logging
 import os
 
-LOG_DIR = os.path.join(os.path.dirname(__file__), '../../logs')  # путь к папке logs
-os.makedirs(LOG_DIR, exist_ok=True)
+def setup_logging():
+    log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'logs/backend')
+    os.makedirs(log_dir, exist_ok=True)
 
-# Создаем обработчик логов для общего файла `error.log`
-logger = logging.getLogger('app_logger')
-logger.setLevel(logging.INFO)
+    logger = logging.getLogger("app_logger")
+    logger.setLevel(logging.INFO)
 
-# Обработчик для ошибок
-file_handler = logging.FileHandler(os.path.join(LOG_DIR, 'error.log'))
-file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-# Формат логов
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
+    # Файловый обработчик
+    file_handler = logging.FileHandler(os.path.join(log_dir, 'app.log'))
+    file_handler.setFormatter(formatter)
+    logger.addHandler(route_handler := file_handler)
 
-logger.addHandler(file_handler)
+    # Консольный обработчик
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+    return logger
+
+logger = setup_logging()
