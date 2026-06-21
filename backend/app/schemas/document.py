@@ -1,28 +1,15 @@
 from pydantic import BaseModel
-from datetime import datetime
 from typing import Optional
 
+class DocumentCreate(BaseModel):
+    name: str
+    owner_id: int
 
 class DocumentResponse(BaseModel):
     id: int
-    filename: str
-    size: int
+    name: str
     status: str
-    uploaded_at: datetime
+    uploaded_at: str
 
     class Config:
-        from_attributes = True
-
-
-class DocumentListResponse(BaseModel):
-    documents: list[DocumentResponse]
-
-
-class DocumentStatusResponse(BaseModel):
-    id: int
-    status: str
-    error_message: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-
+        orm_mode = True

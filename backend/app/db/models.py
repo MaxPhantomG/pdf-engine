@@ -1,49 +1,39 @@
-from datetime import datetime
-from sqlalchemy import String, DateTime, Integer, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from .session import Base
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    username = Column(String(150), unique=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    token = Column(String(255), unique=True, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(100), unique=True, index=True)
-    password_hash: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    
-    # Связь с документами
-    documents: Mapped[list["Document"]] = relationship("Document", back_populates="owner")
-
+    documents = relationship("Document", back_populates="user")
 
 class Document(Base):
     __tablename__ = "documents"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    name = Column(String(255))
+    file_path = Column(String(512))
+    size = Column(Integer)
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    status = Column(Enum("queued", "processing", "ready", "failed", name="doc_status"), default="queued")
+    pages_count = Column(Integer, nullable=True)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    filename: Mapped[str] = mapped_column(String(255))
-    file_path: Mapped[str] = mapped_column(String(255))
-    size: Mapped[int] = mapped_column(Integer)
-    status: Mapped[str] = mapped_column(String(50), default="queued")  # queued, processing, ready, error
-    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    
-    owner: Mapped["User"] = relationship("User", back_populates="documents")
-
+    user = relationship("User", back_populates="documents")
+    fragments = relationship("DocumentFragment", back_populates="document", cascade="all, delete-orphan")
 
 class DocumentFragment(Base):
     __tablename__ = "document_fragments"
+    id = Column(Integer, primary_key=True)
+    document_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
+    page = Column(Integer)
+    text = Column(Text)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
-    page: Mapped[int] = mapped_column(Integer)
-    text: Mapped[str] = mapped_column(String(5000))
-
-
-class Task(Base):
-    __tablename__ = "tasks"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
-    status: Mapped[str] = mapped_column(String(50), default="pending")  # pending, processing, completed, failed
-    error_message: Mapped[str] = mapped_column(String(500), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-
+    document = relationship("Document", back_populates="fragments")

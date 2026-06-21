@@ -1,45 +1,30 @@
-from .worker import app
+from celery import Celery
 from app.db.session import SessionLocal
-from app.db.models import Document, DocumentFragment
-from app.services.processor import extract_text_with_pages
-import logging
+from app.db.models import Document, DocumentFragment, User
+import time
 
-logger = logging.getLogger("worker_logger")
+celery_app = Celery('tasks', broker='redis://redis:6379/0')
 
-@app.task(bind=True, max_retries=3)
-def process_pdf(self, document_id: int):
+@celery_app.task(name="process_pdf")
+def process_pdf(doc_id: int):
     db = SessionLocal()
     try:
-        doc = db.query(Document).filter(Document.id == document_id).first()
-        if not doc:
-            return {"status": "error", "message": "Document not found"}
+        doc = db.query(Document).filter(Document.id == doc_id).first()
+        if not doc: return "Not found"
 
+        # Имитируем работу
         doc.status = "processing"
         db.commit()
-
-        pages_data = extract_text_with_pages(doc.file_path)
-
-        db.query(DocumentFragment).filter(DocumentFragment.document_id == document_id).delete()
         
-        for page_num, text in pages_data:
-            fragment = DocumentFragment(
-                document_id=document_id,
-                page=page_num,
-                text=text
-            )
-            db.add(fragment)
-
-        doc.status = "ready"
+        time.sleep(5) # Имитация долгого парсинга PDF
+        
+        doc.status = "completed"
         db.commit()
-        
-        logger.info(f"Document {document_id} processed successfully. Created {len(pages_data)} fragments.")
-        return {"status": "success", "fragments_count": len(pages_data)}
-
+        return f"Doc {doc_id} processed"
     except Exception as e:
-        db.rollback()
-        logger.error(f"Error processing doc {document_id}: {str(e)}")
-        doc.status = "error"
-        db.commit()
-        raise self.retry(exc=e, countdown=300)
+        if doc:
+            doc.status = "error"
+            db.commit()
+        return str(e)
     finally:
         db.close()

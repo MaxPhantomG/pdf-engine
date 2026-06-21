@@ -1,53 +1,69 @@
-from fastapi import APIRint, APIRouter, Depends, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
-import uuid
-import os
-from app.db.models import User, Document
-from app.db.session import get_db
-from app.schemas.document import DocumentResponse
-from app.core.security import get_current_user
-from app.services.file_service import save_uploaded_file
-from app.services.task_service import enqueue_pdf_processing
-from app.core.logging import logger
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Header
+from typing import List
+from pathlib import Path
+from fastapi import Header
+from app.db.session import SessionLocal
+from app.db.models import Document, User
+from app.services.pdf_service import extract_text_with_pages
+from app.services.file_service import save_upload_file
+from worker.app.tasks import process_pdf
 
-router = APIRouter(prefix="/documents", tags=["documents"])
+router = APIRouter()
 
-@router.post("/", response_model=list[DocumentResponse])
+# 1. Умная функция получения текущего пользователя
+def get_current_user(x_user_token: str = Header(None, alias="X-User-Token")):
+    db = SessionLocal()
+    try:
+        if not x_user_token:
+            raise HTTPException(status_code=401, detail="Token missing")
+        # Ищем пользователя, у которого в базе совпадает токен
+        user = db.query(User).filter(User.token == x_user_token).first()
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user
+    finally:
+        db.close()
+
+@router.get("/documents")
+def list_documents(current_user: User = Depends(get_current_user)):
+    db = SessionLocal()
+    try:
+        # 2. Фильтруем документы: только те, что принадлежат текущему пользователю
+        docs = db.query(Document).filter(Document.user_id == current_user.id).all()
+        return [
+            {"id": d.id, "name": d.name, "status": d.status, "uploaded_at": d.uploaded_at}
+            for d in docs
+        ]
+    finally:
+        db.close()
+
+@router.post("/documents/")
 async def upload_documents(
-    files: list[UploadFile] = File(...), 
-    current_user: User = Depends(get_currentint_user), 
-    db: Session = Depends(get_db)
+    files: List[UploadFile] = File(...), 
+    current_user: User = Depends(get_current_user)
 ):
-    results = []
-    for file in files:
-        # 1. Валидация расширения
-        if not file.filename.lower().endswith('.pdf'):
-            logger.error(f"Invalid file type: {file.filename}")
-            continue # Или raise HTTPException, если нужно прерывать всё
-
-        try:
-            filename = f"{uuid.uuid4()}.pdf"
-            file_path = await save_uploaded_file(file, filename)
-            
-            # 2. Создание записи
-            doc = Document(
-                name=file.filename,
-                path=file_path,
-                size=os.path.getsize(file_path),
-                status="queued",
-                user_id=current_user.id
-            )
+    db = SessionLocal()
+    try:
+        for file in files:
+            # Используем current_user.id вместо 1
+            doc = Document(user_id=current_user.id, name=file.filename, status="queued")
             db.add(doc)
             db.commit()
             db.refresh(doc)
-            
-            # 3. Постановка в очередь
-            enqueue_pdf_processing(doc.id)
-            results.append(doc)
-            
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Failed to upload {file.filename}: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error processing {file.filename}")
+        return {"status": "ok"}
+    finally:
+        db.close()
 
-    return results
+# 3. Добавим удаление (чтобы "что-то можно было сделать")
+@router.delete("/documents/{doc_id}")
+def delete_document(doc_id: int, current_user: User = Depends(get_current_user)):
+    db = SessionLocal()
+    try:
+        doc = db.query(Document).filter(Document.id == doc_id, Document.user_id == current_user.id).first()
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+        db.delete(doc)
+        db.commit()
+        return {"message": "Deleted"}
+    finally:
+        db.close()

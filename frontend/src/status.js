@@ -1,34 +1,30 @@
 import { fetchDocumentStatus } from "./api.js";
 
-export async function getDocumentStatus(documentId) {
-  const result = await fetchDocumentStatus(documentId);
-
-  if (!result.ok) {
-    return {
-      ok: false,
-      message: result.data?.detail || "Ошибка получения статуса",
-      data: null,
-    };
-  }
-
-  return {
-    ok: true,
-    data: result.data,
-  };
-}
-
 export function formatStatus(status) {
-  switch (status) {
+  switch ((status || "").toString().toLowerCase()) {
     case "queued":
-      return "В очереди";
+      return "Ожидание";
     case "processing":
       return "Обрабатывается";
     case "ready":
       return "Готов";
-    case "error":
+    case "failed":
       return "Ошибка";
     default:
-      return status || "Неизвестно";
+      return String(status || "неизвестно");
   }
 }
 
+
+export async function getDocumentStatus(documentId) {
+  try {
+    const result = await fetchDocumentStatus(documentId);
+    return {
+      ok: result.ok,
+      status: result.status,
+      data: result.data,
+    };
+  } catch (e) {
+    return { ok: false, status: 500, data: { detail: e?.message ?? "Ошибка запроса статуса" } };
+  }
+}

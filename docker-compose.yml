@@ -1,38 +1,61 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
     ports:
-      - "8080:8080"
-    restart: unless-stopped
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+      - ./worker:/app/worker
+      - ./storage:/app/storage
     ports:
       - "8000:8000"
     environment:
-      # например, укажите переменные, если нужно
+      - PYTHONPATH=/app
+      - DATABASE_URL=postgresql://postgres:example@db:5432/postgres
+      - PYTHONUNBUFFERED=1
     depends_on:
+      - db
       - redis
-    restart: unless-stopped
 
   worker:
     build:
-      context: ./worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./worker/Dockerfile
+    volumes:
+      - ./worker:/app/worker
+      - ./backend/app:/app/app
+      - ./storage:/app/storage 
     environment:
-      # переменные окружения, если нужны
+      - PYTHONPATH=/app:/app/backend
+      - DATABASE_URL=postgresql://postgres:example@db:5432/postgres
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
+      - db
       - redis
-    restart: unless-stopped
 
-  redis:
-    image: redis:7
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "6379:6379"
-    restart: unless-stopped
+      - "8080:80" 
+    depends_on:
+      - backend
+    environment:
+      - API_BASE_URL=http://backend:8000from fastapi import FastAPI

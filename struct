@@ -43,10 +43,7 @@ pdf-engine/
 │  └─ Dockerfile
 ├─ worker/
 │  ├─ app/
-│  │  ├─ worker.py
 │  │  ├─ tasks.py
-│  │  └─ processor.py
-│  ├─ requirements.txt
 │  └─ Dockerfile
 ├─ storage/
 │  ├─ files/
@@ -55,12 +52,6 @@ pdf-engine/
 │  │  └─ .gitkeep
 │  └─ db/
 │     └─ .gitkeep
-├─ logs/
-│  ├─ backend/
-│  │  └─ .gitkeep
-│  ├─ worker/
-│  │  └─ .gitkeep
-│  └─ error.log
 ├─ docker-compose.yml
 ├─ .env.example
 ├─ .gitignore

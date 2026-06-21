@@ -1,14 +1,6 @@
-from pydantic_settings import BaseSettings
+import os
+from typing import Final
 
-
-class Settings(BaseSettings):
-    DATABASE_URL: str
-    SECRET_KEY: str
-    JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-
-    class Config:
-        env_file = ".env"
-
-
-settings = Settings()
+DATABASE_URL: Final[str] = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db/pdfengine")
+REDIS_URL: Final[str] = os.getenv("REDIS_URL", "redis://redis:6379/0")
+STORAGE_ROOT: Final[str] = os.getenv("STORAGE_ROOT", "storage/files")

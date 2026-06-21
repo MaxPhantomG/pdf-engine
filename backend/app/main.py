@@ -1,20 +1,20 @@
 from fastapi import FastAPI
+from app.api.routes_documents import router as documents_router
+from app.api.routes_search import router as search_router
+from app.api.routes_status import router as status_router
 from app.api.routes_auth import router as auth_router
-from app.api import routes_documents, routes_status, routes_search
-from app.core.logging import logger
+from app.db.session import engine
+from app.db.models import Base, User, Document, DocumentFragment
 
-app = FastAPI(title="PDF Engine API")
+Base.metadata.create_all(bind=engine)
 
-# Подключаем роутеры
-app.include_router(auth_router)
-app.include_router(routes_documents.router)
-app.include_router(routes_status.router)
-app.include_router(routes_search.router)
+app = FastAPI(title="PDF Engine MVP")
 
-@app.on_event("startup")
-async def startup_event():
-    logger.info("PDF Engine API started successfully.")
+app.include_router(auth_router, prefix="/api/auth") 
+app.include_router(documents_router, prefix="/api")
+app.include_router(search_router, prefix="/api")
+app.include_router(status_router, prefix="/api")
 
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "PDF Engine API is running"}
+    return {"status": "ok", "message": "PDF Engine MVP is running"}

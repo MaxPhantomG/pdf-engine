@@ -1,39 +1,40 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = (typeof window !== "undefined" && window.location.origin)
+  ? `${window.location.origin}/api`
+  : "http://localhost:8000/api";
 
 function getToken() {
   return localStorage.getItem("token");
 }
 
 async function request(path, options = {}) {
-  const headers = { ...(options.headers || {}) };
+  const headers = new Headers(options.headers || {});
   const token = getToken();
 
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers.set("X-User-Token", token);
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
+  const resp = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
   });
 
-  const contentType = response.headers.get("content-type") || "";
-
+  const contentType = resp.headers.get("content-type") || "";
+  let data;
   if (contentType.includes("application/json")) {
-    const data = await response.json();
-    return { ok: response.ok, status: response.status, data };
+    data = await resp.json();
+  } else {
+    data = await resp.text();
   }
 
-  const text = await response.text();
-  return { ok: response.ok, status: response.status, data: text };
+  return { ok: resp.ok, status: resp.status, data };
 }
 
 export async function login(username, password) {
   return request("/auth/login", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
 }
@@ -41,20 +42,16 @@ export async function login(username, password) {
 export async function register(username, password) {
   return request("/auth/register", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
 }
 
 export async function uploadDocuments(files) {
   const formData = new FormData();
-
   for (const file of files) {
     formData.append("files", file);
   }
-
   return request("/documents/", {
     method: "POST",
     body: formData,
@@ -75,6 +72,10 @@ export async function searchDocuments(query) {
   });
 }
 
+export async function deleteDocument(id) {
+  return request(`/documents/${id}`, { method: "DELETE" });
+}
+
 export function saveToken(token) {
   localStorage.setItem("token", token);
 }
@@ -86,4 +87,3 @@ export function clearToken() {
 export function isLoggedIn() {
   return Boolean(getToken());
 }
-

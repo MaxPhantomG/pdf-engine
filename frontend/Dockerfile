@@ -1,13 +1,18 @@
-FROM node:20-alpine
+FROM alpine:3.19 AS builder
+WORKDIR /frontend
 
-WORKDIR /src
+COPY public /frontend/public
+COPY src /frontend/src
+COPY src/styles.css /frontend/styles.css
 
-COPY package.json ./
-RUN npm install --omit=dev
+FROM nginx:1.25-alpine
 
-COPY . .
+COPY --from=builder /frontend/public /usr/share/nginx/html
+COPY --from=builder /frontend/src /usr/share/nginx/html/src
+COPY --from=builder /frontend/styles.css /usr/share/nginx/html/styles.css
 
-EXPOSE 8080
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-CMD ["npm", "start"]
+EXPOSE 80
 
+CMD ["nginx", "-g", "daemon off;"]

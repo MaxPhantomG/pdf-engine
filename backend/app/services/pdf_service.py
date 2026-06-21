@@ -1,44 +1,22 @@
-import json
-import PyPDF2
-from pathlib import Path
+from typing import List, Tuple
+import pdfplumber
+import logging
 
+logger = logging.getLogger("pdf_service")
 
-def extract_text_from_pdf(file_path: str) -> dict:
+def extract_text_with_pages(file_path: str) -> List[Tuple[int, str]]:
     """
-    Извлекает текст из PDF.
-    Возвращает словарь с структурой: {page_number: text}
+    Возвращает список кортежей: [(page_number, text), ...]
     """
-    pages_data = {}
-    
+    pages_content: List[Tuple[int, str]] = []
     try:
-        with open(file_path, "rb") as pdf_file:
-            pdf_reader = PyPDF2.PdfReader(pdf_file)
-            num_pages = len(pdf_reader.pages)
-            
-            for page_num in range(num_pages):
-                page = pdf_reader.pages[page_num]
-                text = page.extract_text()
-                pages_data[page_num + 1] = text if text else ""
-    
+        with open(file_path, 'rb') as f:
+            with pdfplumber.open(f) as pdf:
+                for i, page in enumerate(pdf.pages, start=1):
+                    text = page.extract_text()
+                    if text and text.strip():
+                        pages_content.append((i, text.strip()))
+        return pages_content
     except Exception as e:
-        raise Exception(f"Error extracting PDF: {str(e)}")
-    
-    return pages_data
-
-
-def save_extracted_data(extracted_path: str, pages_data: dict):
-    """Сохраняет извлеченные данные в JSON"""
-    Path(extracted_path).parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(extracted_path, "w", encoding="utf-8") as f:
-        json.dump(pages_data, f, ensure_ascii=False, indent=2)
-
-
-def load_extracted_data(extracted_path: str) -> dict:
-    """Загружает извлеченные данные из JSON"""
-    try:
-        with open(extracted_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-
+        logger.exception(f"Failed to parse PDF {file_path}: {str(e)}")
+        raise

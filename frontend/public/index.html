@@ -1,52 +1,59 @@
 <!doctype html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Engine</title>
-    <link rel="stylesheet" href="/src/styles.css" />
-  </head>
-  <body>
-    <div class="container">
-      <h1>PDF Engine</h1>
-
-      <section class="card" id="auth-section">
-        <h2>Вход / регистрация</h2>
-        <form id="auth-form">
-          <input id="username" type="text" placeholder="Логин" required />
-          <input id="password" type="password" placeholder="Пароль" required />
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF Engine - CLI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- простая структура: аутентификация и основное приложение -->
+    <section id="auth-section">
+      <form id="auth-form" class="form" autocomplete="off">
+        <div class="form-row">
+          <label>Имя пользователя
+            <input id="username" type="text" required />
+          </label>
+          <label>Пароль
+            <input id="password" type="password" required />
+          </label>
+        </div>
+        <div class="actions">
           <button type="submit" id="login-btn">Войти</button>
-          <button type="button" id="register-btn">Регистрация</button>
+          <button type="submit" id="register-btn" class="secondary">Регистрация</button>
+        </div>
+        <div id="auth-message" class="message"></div>
+      </form>
+    </section>
+
+    <section id="app-section" class="hidden">
+      <button id="logout-btn" class="secondary">Выйти</button>
+
+      <section id="upload-section" class="section">
+        <form id="upload-form" class="form" enctype="multipart/form-data">
+          <input id="pdf-files" type="file" multiple accept="application/pdf" />
+          <button type="submit">Загрузить PDF</button>
+          <div id="upload-message" class="message"></div>
         </form>
-        <p id="auth-message"></p>
       </section>
 
-      <section class="card">
-        <h2>Загрузка PDF</h2>
-        <form id="upload-form">
-          <input id="pdf-files" type="file" accept="application/pdf" multiple />
-          <button type="submit">Загрузить</button>
-        </form>
-        <p id="upload-message"></p>
-      </section>
-
-      <section class="card">
-        <h2>Мои документы</h2>
-        <button id="refresh-docs-btn" type="button">Обновить список</button>
+      <section id="documents-section" class="section">
+        <button id="refresh-docs-btn">Обновить список</button>
         <div id="documents-list"></div>
       </section>
 
-      <section class="card">
-        <h2>Поиск по документам</h2>
-        <form id="search-form">
-          <input id="search-query" type="text" placeholder="Введите запрос" required />
+      <section id="search-section" class="section">
+        <form id="search-form" class="form">
+          <input id="search-query" type="text" placeholder="Поиск по документам" />
           <button type="submit">Искать</button>
         </form>
+        <div id="search-message" class="message"></div>
         <div id="search-results"></div>
       </section>
-    </div>
+    </section>
+  </div>
 
-    <script type="module" src="/src/main.js"></script>
-  </body>
+  <script type="module" src="/src/main.js"></script>
+</body>
 </html>
-

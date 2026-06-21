@@ -1,11 +1,13 @@
 FROM python:3.11-slim
 
-WORKDIR /worker
+WORKDIR /app
 
-COPY requirements.txt .
+COPY backend/requirements.txt ./requirements.txt
+RUN python -m pip install --no-cache-dir --default-timeout=120 -r requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY worker/ ./worker/
 
-COPY ./ ./ 
+ENV PYTHONPATH=/app
+ENV DATABASE_URL=postgresql://postgres:example@db:5432/postgres
 
-CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info"]
+CMD ["celery", "-A", "worker.app.tasks", "worker", "--loglevel=info"]
