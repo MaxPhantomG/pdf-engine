@@ -4,7 +4,7 @@ from app.api.routes_search import router as search_router
 from app.api.routes_status import router as status_router
 from app.api.routes_auth import router as auth_router
 from app.db.session import engine
-from app.db.models import Base, User, Document, DocumentFragment
+from app.db.models import Base, User, Document, DocumentFragment    
 
 Base.metadata.create_all(bind=engine)
 
