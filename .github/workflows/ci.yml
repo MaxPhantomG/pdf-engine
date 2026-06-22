@@ -62,4 +62,4 @@ jobs:
           PYTHONPATH: ./backend
         run: |
           cd backend
-          pytest tests/test_auth.py -v
+          pytest app/tests/test_auth.py -v
