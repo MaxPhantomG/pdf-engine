@@ -14,6 +14,18 @@ def get_engine():
         _engine = create_engine(url, echo=False, pool_size=5)
     return _engine
 
+class _SessionLocalProxy:
+    def __init__(self):
+        self._factory = None  
+
+    def __call__(self, *args, **kwargs):
+        if self._factory is None:
+            Engine = get_engine()
+            self._factory = sessionmaker(autocommit=False, autoflush=False, bind=Engine)
+        return self._factory(*args, **kwargs)
+
+SessionLocal = _SessionLocalProxy()
+
 def get_db():
     Engine = get_engine()
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=Engine)
