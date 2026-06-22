@@ -58,4 +58,4 @@ services:
     depends_on:
       - backend
     environment:
-      - API_BASE_URL=http://backend:8000from fastapi import FastAPI
+      - API_BASE_URL=http://backend:8000
