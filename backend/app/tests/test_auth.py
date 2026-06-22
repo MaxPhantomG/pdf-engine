@@ -1,4 +1,6 @@
-# /backend/app/tests/test_auth.py
+import os
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test_auth.db")
+
 import pytest
 import sys
 from pathlib import Path
