@@ -44,6 +44,8 @@ pdf-engine/
 ├─ worker/
 │  ├─ app/
 │  │  ├─ tasks.py
+│  │  ├─ processor.py[[unused]]
+│  │  ├─ worker.py[[unused]]
 │  └─ Dockerfile
 ├─ storage/
 │  ├─ files/
@@ -53,6 +55,5 @@ pdf-engine/
 │  └─ db/
 │     └─ .gitkeep
 ├─ docker-compose.yml
-├─ .env.example
 ├─ .gitignore
 └─ README.md
