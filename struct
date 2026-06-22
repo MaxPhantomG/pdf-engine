@@ -1,0 +1,58 @@
+pdf-engine/
+├─ backend/
+│  ├─ app/
+│  │  ├─ main.py
+│  │  ├─ config.py
+│  │  ├─ core/
+│  │  │  ├─ auth.py
+│  │  │  ├─ security.py
+│  │  │  └─ logging.py
+│  │  ├─ db/
+│  │  │  ├─ session.py
+│  │  │  ├─ models.py
+│  │  │  └─ migrations/
+│  │  ├─ api/
+│  │  │  ├─ routes_auth.py
+│  │  │  ├─ routes_documents.py
+│  │  │  ├─ routes_search.py
+│  │  │  └─ routes_status.py
+│  │  ├─ services/
+│  │  │  ├─ file_service.py
+│  │  │  ├─ pdf_service.py
+│  │  │  ├─ index_service.py
+│  │  │  └─ task_service.py
+│  │  └─ schemas/
+│  │     ├─ auth.py
+│  │     ├─ document.py
+│  │     ├─ search.py
+│  │     └─ status.py
+│  ├─ requirements.txt
+│  └─ Dockerfile
+├─ frontend/
+│  ├─ public/
+│  │  └─ index.html
+│  ├─ src/
+│  │  ├─ main.js
+│  │  ├─ api.js
+│  │  ├─ auth.js
+│  │  ├─ documents.js
+│  │  ├─ search.js
+│  │  ├─ status.js
+│  │  └─ styles.css
+│  ├─ package.json
+│  └─ Dockerfile
+├─ worker/
+│  ├─ app/
+│  │  ├─ tasks.py
+│  └─ Dockerfile
+├─ storage/
+│  ├─ files/
+│  │  └─ .gitkeep
+│  ├─ extracted/
+│  │  └─ .gitkeep
+│  └─ db/
+│     └─ .gitkeep
+├─ docker-compose.yml
+├─ .env.example
+├─ .gitignore
+└─ README.md
