@@ -26,6 +26,21 @@ class _SessionLocalProxy:
 
 SessionLocal = _SessionLocalProxy()
 
+class _EngineProxy:
+    def __init__(self):
+        self._engine = None
+
+    def _get_engine(self):
+        if self._engine is None:
+            self._engine = get_engine()
+        return self._engine
+
+    def __getattr__(self, item):
+        eng = self._get_engine()
+        return getattr(eng, item)
+
+engine = _EngineProxy()
+
 def get_db():
     Engine = get_engine()
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=Engine)
