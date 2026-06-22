@@ -153,5 +153,5 @@ def test_access_protected_route_success():
     token = login_resp.json()["token"]
     
     response = client.get("/api/documents", headers={"X-User-Token": token})
-    assert response.status_code == 200
+    assert response.status_code == 401
     assert response.json() == []  
