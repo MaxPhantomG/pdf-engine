@@ -23,7 +23,7 @@ jobs:
           
       - name: Build Worker Image
         run: |
-          docker build -t worker-test ./worker
+          docker build -t worker-test .
 
   test:
     name: Run Pytests
