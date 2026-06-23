@@ -25,13 +25,13 @@ open http://localhost:8080
 *  поиск по словам(реализован только веб-интерфейс, логика не реализована)
 
 # Стэк технологий
-*  API:
-  * FastAPI
-  * uvicorn
-*  база данных(хранений пдф документо):
-  * PostgreSQL  
-  * SQLAlchemy
-*  воркер(обработка задач):
-  *  celery
-  * redis
-*  docker(сборка проекта)
+-  API:
+  - FastAPI
+  - uvicorn
+-  база данных(хранений пдф документо):
+  - PostgreSQL  
+  - SQLAlchemy
+-  воркер(обработка задач):
+  -  celery
+  - redis
+-  docker(сборка проекта)
