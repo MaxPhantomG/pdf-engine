@@ -26,6 +26,8 @@ pdf-engine/
 │  │     ├─ document.py
 │  │     ├─ search.py
 │  │     └─ status.py
+|  |  └─ tests/
+│  │  │  └─ test_auth.py    
 │  ├─ requirements.txt
 │  └─ Dockerfile
 ├─ frontend/
