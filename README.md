@@ -26,8 +26,8 @@ open http://localhost:8080
 
 # Стэк технологий
 -  API:
-  * FastAPI
-  * uvicorn
+  - FastAPI
+  - uvicorn
 -  база данных(хранений пдф документо):
   * PostgreSQL  
   * SQLAlchemy
