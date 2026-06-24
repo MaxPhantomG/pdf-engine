@@ -3,9 +3,11 @@ from pathlib import Path
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Header
 from typing import List
 
+from pydantic import BaseModel
 from app.db.session import SessionLocal
 from app.db.models import Document, User
 from app.services.file_service import save_upload_file
+from app.services.pdf_service import extract_text
 from worker.app.tasks import process_pdf
 from app.config import STORAGE_ROOT
 
@@ -81,5 +83,83 @@ def delete_document(doc_id: int, current_user: User = Depends(get_current_user))
         db.delete(doc)
         db.commit()
         return {"message": "Deleted"}
+    finally:
+        db.close()
+
+
+
+@router.get("/documents/{doc_id}/content")
+def get_document_content(
+    doc_id: int, 
+    current_user: User = Depends(get_current_user)
+):
+    """Получить полный текст документа"""
+    db = SessionLocal()
+    try:
+        doc = db.query(Document).filter(
+            Document.id == doc_id, 
+            Document.user_id == current_user.id
+        ).first()
+        
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        if doc.status != "ready":
+            raise HTTPException(status_code=400, detail="Document not ready yet")
+        
+        return {"content": doc.content}
+    finally:
+        db.close()
+
+
+@router.get("/documents/{doc_id}/search")
+def search_in_document(
+    doc_id: int, 
+    q: str, 
+    current_user: User = Depends(get_current_user)
+):
+    """Поиск внутри документа"""
+    db = SessionLocal()
+    try:
+        doc = db.query(Document).filter(
+            Document.id == doc_id, 
+            Document.user_id == current_user.id
+        ).first()
+        
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        if doc.status != "ready":
+            raise HTTPException(status_code=400, detail="Document not ready yet")
+        
+        if not doc.content:
+            return {"total_matches": 0, "matches": []}
+        
+        content_lower = doc.content.lower()
+        query_lower = q.lower()
+        
+        # Находим все совпадения
+        matches = []
+        pos = 0
+        while True:
+            pos = content_lower.find(query_lower, pos)
+            if pos == -1:
+                break
+            
+            start = max(0, pos - 100)
+            end = min(len(doc.content), pos + len(q) + 100)
+            snippet = doc.content[start:end]
+            
+            matches.append({
+                "position": pos,
+                "snippet": snippet
+            })
+            
+            pos += len(q)
+        
+        return {
+            "total_matches": len(matches),
+            "matches": matches[:50]  # Ограничиваем до 50 результатов
+        }
     finally:
         db.close()

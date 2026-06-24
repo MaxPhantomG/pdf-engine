@@ -8,7 +8,7 @@
 </head>
 <body>
   <div id="app">
-    <!-- простая структура: аутентификация и основное приложение -->
+    <!-- аутентификация -->
     <section id="auth-section">
       <form id="auth-form" class="form" autocomplete="off">
         <div class="form-row">
@@ -27,8 +27,10 @@
       </form>
     </section>
 
+
     <section id="app-section" class="hidden">
       <button id="logout-btn" class="secondary">Выйти</button>
+
 
       <section id="upload-section" class="section">
         <form id="upload-form" class="form" enctype="multipart/form-data">
@@ -43,15 +45,30 @@
         <div id="documents-list"></div>
       </section>
 
-      <section id="search-section" class="section">
-        <form id="search-form" class="form">
-          <input id="search-query" type="text" placeholder="Поиск по документам" />
-          <button type="submit">Искать</button>
-        </form>
-        <div id="search-message" class="message"></div>
-        <div id="search-results"></div>
-      </section>
-    </section>
+    <div id="document-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-document-name">Название документа</h2>
+          <button id="modal-close" class="close-btn">&times;</button>
+        </div>
+        
+
+        <div class="modal-search">
+          <form id="modal-search-form" class="form-inline">
+            <input id="modal-search-query" type="text" placeholder="Поиск в документе" />
+            <button type="submit">Найти</button>
+          </form>
+          <div id="modal-search-message" class="message"></div>
+          <div id="modal-search-results" class="search-results"></div>
+        </div>
+        
+        <!-- Содержимое документа -->
+        <div class="modal-body">
+          <div id="modal-document-content" class="document-content"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>
