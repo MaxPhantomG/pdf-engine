@@ -20,7 +20,6 @@ def process_pdf(doc_id: int):
     doc = None  
     
     try:
-        # Получаем документ из БД
         doc = db.query(Document).filter(Document.id == doc_id).first()
         if not doc:
             logger.error(f"Document {doc_id} not found")
