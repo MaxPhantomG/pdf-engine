@@ -72,6 +72,38 @@ export async function searchDocuments(query) {
   });
 }
 
+export async function fetchDocumentContent(documentId) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`/api/documents/${documentId}/content`, {
+    headers: {
+      'X-User-Token': token || ''
+    }
+  });
+  
+  return response.ok 
+    ? { ok: true, data: await response.json() }
+    : { ok: false, data: await response.json() };
+}
+
+export async function searchInDocument(documentId, query) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`/api/documents/${documentId}/search?q=${encodeURIComponent(query)}`, {
+    headers: {
+      'X-User-Token': token || ''
+    }
+  });
+  
+  return response.ok 
+    ? { ok: true, data: await response.json() }
+    : { ok: false, data: await response.json() };
+}
+
+export async function searchDocuments(query) {
+  return request(`/search/?query=${encodeURIComponent(query)}`, {
+    method: "GET",
+  });
+}
+
 export async function deleteDocument(id) {
   return request(`/documents/${id}`, { method: "DELETE" });
 }

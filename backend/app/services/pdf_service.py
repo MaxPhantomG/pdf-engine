@@ -20,3 +20,21 @@ def extract_text_with_pages(file_path: str) -> List[Tuple[int, str]]:
     except Exception as e:
         logger.exception(f"Failed to parse PDF {file_path}: {str(e)}")
         raise
+        
+def extract_text(file_path: str) -> str:
+    """
+    Возвращает полный текст документа в одной строке
+    """
+    try:
+        with open(file_path, 'rb') as f:
+            with pdfplumber.open(f) as pdf:
+                full_text = ""
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text and text.strip():
+                        full_text += text.strip() + "\n"
+                return full_text.strip()
+    except Exception as e:
+        logger.exception(f"Failed to extract full text from PDF {file_path}: {str(e)}")
+        raise
+

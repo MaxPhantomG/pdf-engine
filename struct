@@ -26,6 +26,8 @@ pdf-engine/
 │  │     ├─ document.py
 │  │     ├─ search.py
 │  │     └─ status.py
+|  |  └─ tests/
+│  │  │  └─ test_auth.py    
 │  ├─ requirements.txt
 │  └─ Dockerfile
 ├─ frontend/
@@ -44,6 +46,8 @@ pdf-engine/
 ├─ worker/
 │  ├─ app/
 │  │  ├─ tasks.py
+│  │  ├─ processor.py[[unused]]
+│  │  ├─ worker.py[[unused]]
 │  └─ Dockerfile
 ├─ storage/
 │  ├─ files/
@@ -53,6 +57,5 @@ pdf-engine/
 │  └─ db/
 │     └─ .gitkeep
 ├─ docker-compose.yml
-├─ .env.example
 ├─ .gitignore
 └─ README.md
