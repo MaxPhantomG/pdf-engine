@@ -98,11 +98,6 @@ export async function searchInDocument(documentId, query) {
     : { ok: false, data: await response.json() };
 }
 
-export async function searchDocuments(query) {
-  return request(`/search/?query=${encodeURIComponent(query)}`, {
-    method: "GET",
-  });
-}
 
 export async function deleteDocument(id) {
   return request(`/documents/${id}`, { method: "DELETE" });
